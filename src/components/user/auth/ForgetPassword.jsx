@@ -5,19 +5,17 @@ import FormInput from '../../form/FormInput';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
 
-const Signup = () => {
+const ForgetPassword = () => {
 	return (
 		<div className='fixed inset-0 bg-primary -z-10 flex justify-center items-center'>
 			<Container>
-				<form action='' className='bg-secondary rounded p-6 w-72 space-y-6'>
-					<Title>Sign up</Title>
-					<FormInput name='name' placeholder='John Doe' label='Name' />
+				<form action='' className='bg-secondary rounded p-6 w-96 space-y-6'>
+					<Title>Please enter your email</Title>
 					<FormInput name='email' placeholder='john@email.com' label='Email' />
-					<FormInput name='password' placeholder='********' label='Password' />
-					<Submit value='Sign up' />
+					<Submit value='Send link' />
 					<div className='flex justify-between'>
-						<CustomLink to='/auth/forget-password'>Forget password</CustomLink>
 						<CustomLink to='/auth/signin'>Sign in</CustomLink>
+						<CustomLink to='/auth/signup'>Sign up</CustomLink>
 					</div>
 				</form>
 			</Container>
@@ -25,4 +23,4 @@ const Signup = () => {
 	);
 };
 
-export default Signup;
+export default ForgetPassword;
