@@ -1,6 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { useEffect } from 'react';
+import { commonModelClasses } from '../../../utils/theme';
 import Container from '../../Container';
+import FormContainer from '../../form/FormContainer';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
 
@@ -50,12 +52,12 @@ const EmailVerification = () => {
 	}, [activeOtpIndex]);
 
 	return (
-		<div className='fixed inset-0 bg-primary -z-10 flex justify-center items-center'>
+		<FormContainer>
 			<Container>
-				<form action='' className='bg-secondary rounded p-6 space-y-6'>
+				<form action='' className={commonModelClasses}>
 					<div>
 						<Title>Please enter the OTP to verify your account</Title>
-						<p className='text-center text-dark-subtle'>
+						<p className='text-center dark:text-dark-subtle text-light-subtle'>
 							OTP has been sent to your email
 						</p>
 					</div>
@@ -70,7 +72,7 @@ const EmailVerification = () => {
 									key={index}
 									onChange={handleOtpChange}
 									onKeyDown={(e) => handleKeyDown(e, index)}
-									className='w-12 h-12 border-2 border-dark-subtle focus:border-white rounded bg-transparent outline-none text-center text-white font-semibold text-xl spin-button-none'
+									className='w-12 h-12 border-2 dark:border-dark-subtle border-light-subtle dark:focus:border-white focus:border-primary rounded bg-transparent outline-none text-center dark:text-white  text-primary font-semibold text-xl spin-button-none'
 								/>
 							);
 						})}
@@ -79,7 +81,7 @@ const EmailVerification = () => {
 					<Submit value='Verify account' />
 				</form>
 			</Container>
-		</div>
+		</FormContainer>
 	);
 };
 

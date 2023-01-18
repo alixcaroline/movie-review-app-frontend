@@ -1,15 +1,17 @@
 import React from 'react';
+import { commonModelClasses } from '../../../utils/theme';
 import Container from '../../Container';
 import CustomLink from '../../CustomLink';
+import FormContainer from '../../form/FormContainer';
 import FormInput from '../../form/FormInput';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
 
 const Signup = () => {
 	return (
-		<div className='fixed inset-0 bg-primary -z-10 flex justify-center items-center'>
+		<FormContainer>
 			<Container>
-				<form action='' className='bg-secondary rounded p-6 w-72 space-y-6'>
+				<form action='' className={commonModelClasses + ' w-72'}>
 					<Title>Sign up</Title>
 					<FormInput name='name' placeholder='John Doe' label='Name' />
 					<FormInput name='email' placeholder='john@email.com' label='Email' />
@@ -21,7 +23,7 @@ const Signup = () => {
 					</div>
 				</form>
 			</Container>
-		</div>
+		</FormContainer>
 	);
 };
 

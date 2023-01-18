@@ -1,15 +1,17 @@
 import React from 'react';
+import { commonModelClasses } from '../../../utils/theme';
 import Container from '../../Container';
 import CustomLink from '../../CustomLink';
+import FormContainer from '../../form/FormContainer';
 import FormInput from '../../form/FormInput';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
 
 const ForgetPassword = () => {
 	return (
-		<div className='fixed inset-0 bg-primary -z-10 flex justify-center items-center'>
+		<FormContainer>
 			<Container>
-				<form action='' className='bg-secondary rounded p-6 w-96 space-y-6'>
+				<form action='' className={commonModelClasses + ' w-96'}>
 					<Title>Please enter your email</Title>
 					<FormInput name='email' placeholder='john@email.com' label='Email' />
 					<Submit value='Send link' />
@@ -19,7 +21,7 @@ const ForgetPassword = () => {
 					</div>
 				</form>
 			</Container>
-		</div>
+		</FormContainer>
 	);
 };
 
