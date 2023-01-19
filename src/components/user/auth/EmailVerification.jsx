@@ -1,13 +1,24 @@
 import React, { useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { commonModelClasses } from '../../../utils/theme';
 import Container from '../../Container';
 import FormContainer from '../../form/FormContainer';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
+import { verifyUserEmail } from '../../../api/auth';
 
 const OTP_LENGTH = 6;
 let currentOTPIndex;
+
+const isValidOTP = (otp) => {
+	let valid = false;
+	for (let val of otp) {
+		valid = !isNaN(parseInt(val));
+		if (!valid) break;
+	}
+	return valid;
+};
 
 const EmailVerification = () => {
 	const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(''));
@@ -15,6 +26,11 @@ const EmailVerification = () => {
 
 	//create a reference on the inputfield to make it possible to use the input field to know when to focus on it
 	const inputRef = useRef();
+
+	const { state } = useLocation();
+	const user = state?.user;
+
+	const navigate = useNavigate();
 
 	const focusNextInputField = (index) => {
 		setActiveOtpIndex(index + 1);
@@ -51,10 +67,30 @@ const EmailVerification = () => {
 		inputRef.current?.focus();
 	}, [activeOtpIndex]);
 
+	useEffect(() => {
+		if (!user) navigate('/not-found');
+	}, [user]);
+
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+
+		// check if otp are 6 numbers
+		if (!isValidOTP(otp)) console.log('invalid otp');
+
+		// otp are nubmbers, check otp in backend
+		const { error, message } = await verifyUserEmail({
+			// convert otp array to string berfore sending to backend
+			OTP: otp.join(''),
+			userId: user.id,
+		});
+		if (error) console.log(error);
+		console.log(message);
+	};
+
 	return (
 		<FormContainer>
 			<Container>
-				<form action='' className={commonModelClasses}>
+				<form onSubmit={handleSubmit} className={commonModelClasses}>
 					<div>
 						<Title>Please enter the OTP to verify your account</Title>
 						<p className='text-center dark:text-dark-subtle text-light-subtle'>
