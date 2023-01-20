@@ -19,7 +19,6 @@ export const verifyUserEmail = async (userInfo) => {
 		return data;
 	} catch (error) {
 		const { response } = error;
-		console.log(response.data);
 		if (response?.data) return response.data;
 
 		return { error: error.message || error };

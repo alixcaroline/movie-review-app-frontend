@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUser } from '../../../api/auth';
+import { useNotification } from '../../../hooks';
 import { commonModelClasses } from '../../../utils/theme';
 import Container from '../../Container';
 import CustomLink from '../../CustomLink';
@@ -35,6 +36,8 @@ const Signup = () => {
 
 	const navigate = useNavigate();
 
+	const { updateNotification } = useNotification();
+
 	const { name, email, password } = userInfo;
 
 	const handleChange = ({ target }) => {
@@ -46,7 +49,7 @@ const Signup = () => {
 		e.preventDefault();
 		const { ok, error } = validateUserInfo(userInfo);
 
-		if (!ok) return console.log(error);
+		if (!ok) return updateNotification('error', error);
 
 		const response = await createUser(userInfo);
 

@@ -7,6 +7,7 @@ import FormContainer from '../../form/FormContainer';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
 import { verifyUserEmail } from '../../../api/auth';
+import { useNotification } from '../../../hooks';
 
 const OTP_LENGTH = 6;
 let currentOTPIndex;
@@ -26,6 +27,8 @@ const EmailVerification = () => {
 
 	//create a reference on the inputfield to make it possible to use the input field to know when to focus on it
 	const inputRef = useRef();
+
+	const { updateNotification } = useNotification();
 
 	const { state } = useLocation();
 	const user = state?.user;
@@ -83,8 +86,9 @@ const EmailVerification = () => {
 			OTP: otp.join(''),
 			userId: user.id,
 		});
-		if (error) console.log(error);
-		console.log(message);
+
+		if (error) updateNotification('error', error);
+		updateNotification('success', message);
 	};
 
 	return (
