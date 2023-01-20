@@ -7,7 +7,7 @@ import FormContainer from '../../form/FormContainer';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
 import { verifyUserEmail } from '../../../api/auth';
-import { useNotification } from '../../../hooks';
+import { useAuth, useNotification } from '../../../hooks';
 
 const OTP_LENGTH = 6;
 let currentOTPIndex;
@@ -24,6 +24,9 @@ const isValidOTP = (otp) => {
 const EmailVerification = () => {
 	const [otp, setOtp] = useState(new Array(OTP_LENGTH).fill(''));
 	const [activeOtpIndex, setActiveOtpIndex] = useState(0);
+
+	const { isAuth, authInfo } = useAuth();
+	const { isLoggedIn } = authInfo;
 
 	//create a reference on the inputfield to make it possible to use the input field to know when to focus on it
 	const inputRef = useRef();
@@ -72,16 +75,21 @@ const EmailVerification = () => {
 
 	useEffect(() => {
 		if (!user) navigate('/not-found');
-	}, [user]);
+		if (isLoggedIn) navigate('/');
+	}, [user, isLoggedIn]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		// check if otp are 6 numbers
-		if (!isValidOTP(otp)) console.log('invalid otp');
+		if (!isValidOTP(otp)) updateNotification('error', 'invalid otp');
 
 		// otp are nubmbers, check otp in backend
-		const { error, message } = await verifyUserEmail({
+		const {
+			error,
+			message,
+			user: userResponse,
+		} = await verifyUserEmail({
 			// convert otp array to string berfore sending to backend
 			OTP: otp.join(''),
 			userId: user.id,
@@ -89,6 +97,8 @@ const EmailVerification = () => {
 
 		if (error) updateNotification('error', error);
 		updateNotification('success', message);
+		localStorage.setItem('auth-token', userResponse.token);
+		isAuth();
 	};
 
 	return (

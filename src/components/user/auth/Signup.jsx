@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createUser } from '../../../api/auth';
-import { useNotification } from '../../../hooks';
+import { useAuth, useNotification } from '../../../hooks';
 import { commonModelClasses } from '../../../utils/theme';
 import Container from '../../Container';
 import CustomLink from '../../CustomLink';
@@ -37,6 +37,8 @@ const Signup = () => {
 	const navigate = useNavigate();
 
 	const { updateNotification } = useNotification();
+	const { authInfo } = useAuth();
+	const { isLoggedIn } = authInfo;
 
 	const { name, email, password } = userInfo;
 
@@ -60,6 +62,12 @@ const Signup = () => {
 			replace: true,
 		});
 	};
+
+	useEffect(() => {
+		if (isLoggedIn) {
+			navigate('/');
+		}
+	}, [isLoggedIn]);
 
 	return (
 		<FormContainer>
