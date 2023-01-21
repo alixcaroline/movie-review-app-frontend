@@ -6,7 +6,7 @@ import Container from '../../Container';
 import FormContainer from '../../form/FormContainer';
 import Submit from '../../form/Submit';
 import Title from '../../form/Title';
-import { verifyUserEmail } from '../../../api/auth';
+import { resendOTP, verifyUserEmail } from '../../../api/auth';
 import { useAuth, useNotification } from '../../../hooks';
 
 const OTP_LENGTH = 6;
@@ -26,7 +26,8 @@ const EmailVerification = () => {
 	const [activeOtpIndex, setActiveOtpIndex] = useState(0);
 
 	const { isAuth, authInfo } = useAuth();
-	const { isLoggedIn } = authInfo;
+	const { isLoggedIn, profile } = authInfo;
+	const isVerified = profile?.isVerified;
 
 	//create a reference on the inputfield to make it possible to use the input field to know when to focus on it
 	const inputRef = useRef();
@@ -61,6 +62,14 @@ const EmailVerification = () => {
 		setOtp([...newOtp]);
 	};
 
+	const handleOTPResend = async () => {
+		const { error, message } = await resendOTP(user.id);
+
+		if (error) return updateNotification('error', error);
+
+		updateNotification('success', message);
+	};
+
 	const handleKeyDown = (e, index) => {
 		currentOTPIndex = index;
 		if (e.key === 'Backspace') {
@@ -75,8 +84,8 @@ const EmailVerification = () => {
 
 	useEffect(() => {
 		if (!user) navigate('/not-found');
-		if (isLoggedIn) navigate('/');
-	}, [user, isLoggedIn]);
+		if (isLoggedIn && isVerified) navigate('/');
+	}, [user, isLoggedIn, isVerified]);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
@@ -128,7 +137,15 @@ const EmailVerification = () => {
 						})}
 					</div>
 
-					<Submit value='Verify account' />
+					<div>
+						<Submit value='Verify account' />
+						<button
+							type='button'
+							onClick={handleOTPResend}
+							className='dark:text-white text-blue-500 font-semibold hover:underline mt-2'>
+							I don't have an OTP
+						</button>
+					</div>
 				</form>
 			</Container>
 		</FormContainer>

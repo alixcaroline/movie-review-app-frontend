@@ -92,3 +92,17 @@ export const resetPassword = async (passwordInfo) => {
 		return { error: error.message || error };
 	}
 };
+
+export const resendOTP = async (userId) => {
+	try {
+		const { data } = await client.post('/user/resend-email-verification ', {
+			userId,
+		});
+		return data;
+	} catch (error) {
+		const { response } = error;
+		if (response?.data) return response.data;
+
+		return { error: error.message || error };
+	}
+};
