@@ -8,8 +8,13 @@ import ForgetPassword from './components/user/auth/ForgetPassword';
 import ConfirmPassword from './components/user/auth/ConfirmPassword';
 import Home from './components/Home';
 import NotFound from './components/user/NotFound';
+import { useAuth } from './hooks';
+import AdminNavigator from './navigator/AdminNavigator';
 
 const App = () => {
+	const { authInfo } = useAuth();
+	const isAdmin = authInfo.profile?.role === 'admin';
+	if (isAdmin) return <AdminNavigator />;
 	return (
 		<>
 			<Navbar />

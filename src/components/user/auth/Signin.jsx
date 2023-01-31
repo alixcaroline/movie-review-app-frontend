@@ -43,11 +43,11 @@ const Signin = () => {
 		handleLogin(userInfo.email, userInfo.password);
 	};
 
-	useEffect(() => {
-		if (isLoggedIn) {
-			navigate('/');
-		}
-	}, [isLoggedIn]);
+	// useEffect(() => {
+	// 	if (isLoggedIn) {
+	// 		navigate('/');
+	// 	}
+	// }, [isLoggedIn]);
 
 	return (
 		<FormContainer>
