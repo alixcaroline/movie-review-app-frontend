@@ -1,7 +1,12 @@
 import React from 'react';
+import { useState } from 'react';
+import { useNotification } from '../../hooks';
 import { commonInputClasses } from '../../utils/theme';
+import Submit from '../form/Submit';
 import LiveSearch from './LiveSearch';
 import TagsInput from './TagsInput';
+import ModalContainer from '../modals/ModalContainer';
+import WritersModal from '../modals/WritersModal';
 
 export const results = [
 	{
@@ -42,7 +47,27 @@ export const results = [
 	},
 ];
 
+const defaultMovieInfo = {
+	title: '',
+	storyLine: '',
+	tags: [],
+	cast: [],
+	director: {},
+	writers: [],
+	releaseDate: '',
+	poster: null,
+	genres: [],
+	type: '',
+	language: '',
+	status: '',
+};
+
 const MovieForm = () => {
+	const [movieInfo, setMovieInfo] = useState({ ...defaultMovieInfo });
+	const [showWritersModal, setShowWritersModal] = useState(false);
+
+	const { updateNotification } = useNotification();
+
 	const Label = ({ children, htmlFor }) => {
 		return (
 			<label
@@ -53,8 +78,27 @@ const MovieForm = () => {
 		);
 	};
 
+	const LabelWithBadge = ({ children, htmlFor, badge }) => {
+		const renderBadge = () => (
+			<span className='dark:bg-dark-subtle bg-light-subtle absolute top-0 right-0 w-5 h-5 rounded-full flex justify-center items-center text-white translate-x-5 -translate-y-1 text-xs'>
+				{badge <= 9 ? badge : '9+'}
+			</span>
+		);
+		return (
+			<div className='relative'>
+				<label
+					htmlFor={htmlFor}
+					className='dark:text-dark-subtle text-light-subtle font-semibold'>
+					{children}
+				</label>
+				{renderBadge()}
+			</div>
+		);
+	};
+
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		console.log(movieInfo);
 	};
 
 	const renderItem = (result) => {
@@ -70,39 +114,129 @@ const MovieForm = () => {
 		);
 	};
 
-	return (
-		<form onSubmit={handleSubmit} className='flex space-x-3 '>
-			<div className='w-[70%] h-5 space-y-5'>
-				<div>
-					<Label htmlFor='title'>Title</Label>
-					<input
-						id='title'
-						type='text'
-						className={commonInputClasses + ' border-b-2 font-semibold text-xl'}
-						placeholder='Movie title'
-					/>
-				</div>
-				<div>
-					<Label htmlFor='storyLine'>Storyline</Label>
-					<textarea
-						id='storyLine'
-						placeholder='Movie storyline...'
-						className={
-							commonInputClasses + ' border-b-2 resize-none h-24'
-						}></textarea>
-				</div>
+	const handleChange = ({ target }) => {
+		const { value, name } = target;
+		setMovieInfo({ ...movieInfo, [name]: value });
+	};
 
-				<TagsInput />
-				<LiveSearch
-					placeholder='Search profile'
-					results={results}
-					renderItem={renderItem}
-					onSelect={(result) => console.log(result)}
-					onChange={(e) => console.log(e)}
-				/>
-			</div>
-			<div className='w-[30%] h-5 bg-blue-400'>`</div>
-		</form>
+	const updateTags = (tags) => {
+		setMovieInfo({ ...movieInfo, tags });
+	};
+
+	const updateDirector = (profile) => {
+		setMovieInfo({ ...movieInfo, director: profile });
+	};
+
+	const updateWriters = (profile) => {
+		const { writers } = movieInfo;
+		for (let writer of writers) {
+			if (writer.id === profile.id) {
+				return updateNotification(
+					'warning',
+					'This profile is already selected!',
+				);
+			}
+		}
+		setMovieInfo({ ...movieInfo, writers: [...writers, profile] });
+	};
+
+	const hideWritersModal = () => {
+		setShowWritersModal(false);
+	};
+
+	const displayWritersModal = () => {
+		setShowWritersModal(true);
+	};
+
+	const handleWriterRemove = (profileId) => {
+		const { writers } = movieInfo;
+		const newWriters = writers.filter(({ id }) => id !== profileId);
+		if (!newWriters.length) hideWritersModal();
+		setMovieInfo({ ...movieInfo, writers: newWriters });
+	};
+
+	const { title, storyLine, director, writers } = movieInfo;
+
+	return (
+		<>
+			{' '}
+			<form onSubmit={handleSubmit} className='flex space-x-3 '>
+				<div className='w-[70%] h-5 space-y-5'>
+					<div>
+						<Label htmlFor='title'>Title</Label>
+						<input
+							value={title}
+							onChange={handleChange}
+							name='title'
+							id='title'
+							type='text'
+							className={
+								commonInputClasses + ' border-b-2 font-semibold text-xl'
+							}
+							placeholder='Movie title'
+						/>
+					</div>
+					<div>
+						<Label htmlFor='storyLine'>Storyline</Label>
+						<textarea
+							value={storyLine}
+							onChange={handleChange}
+							name='storyLine'
+							id='storyLine'
+							placeholder='Movie storyline...'
+							className={
+								commonInputClasses + ' border-b-2 resize-none h-24'
+							}></textarea>
+					</div>
+
+					<TagsInput name='tags' onChange={updateTags} />
+
+					<div>
+						<Label htmlFor='director'>Director</Label>
+						<LiveSearch
+							name='director'
+							value={director.name}
+							placeholder='Search profile'
+							results={results}
+							renderItem={renderItem}
+							onSelect={updateDirector}
+							onChange={(e) => console.log(e)}
+						/>
+					</div>
+
+					<div>
+						<div className='flex justify-between'>
+							<LabelWithBadge htmlFor='writers' badge={writers.length}>
+								Writers
+							</LabelWithBadge>
+							<button
+								className='dark:text-white text-primary hover:underline transition'
+								onClick={displayWritersModal}>
+								View All
+							</button>
+						</div>
+						<LiveSearch
+							name='writers'
+							value={writers.map((writer) => writer.name)}
+							placeholder='Search profile'
+							results={results}
+							renderItem={renderItem}
+							onSelect={updateWriters}
+							onChange={(e) => console.log(e)}
+						/>
+					</div>
+
+					<Submit value='Upload' />
+				</div>
+				<div className='w-[30%] h-5 bg-blue-400'>`</div>
+			</form>
+			<WritersModal
+				visible={showWritersModal}
+				profiles={writers}
+				onClose={hideWritersModal}
+				onRemoveClick={handleWriterRemove}
+			/>
+		</>
 	);
 };
 

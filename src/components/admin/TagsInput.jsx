@@ -12,7 +12,7 @@ const Tag = ({ children, onClick }) => {
 	);
 };
 
-const TagsInput = () => {
+const TagsInput = ({ name, onChange }) => {
 	const [tag, setTag] = useState('');
 	const [tags, setTags] = useState([]);
 
@@ -22,6 +22,7 @@ const TagsInput = () => {
 	const handleOnchange = ({ target }) => {
 		const { value } = target;
 		if (value !== ',') setTag(value);
+		onChange(tags);
 	};
 
 	const handleKeyDown = ({ key }) => {
