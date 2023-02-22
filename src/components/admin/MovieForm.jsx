@@ -9,6 +9,7 @@ import ModalContainer from '../modals/ModalContainer';
 import WritersModal from '../modals/WritersModal';
 import CastForm from '../form/CastForm';
 import CastModal from '../modals/CastModal';
+import PosterSelector from '../form/PosterSelector';
 
 export const results = [
 	{
@@ -81,6 +82,7 @@ const MovieForm = () => {
 	const [movieInfo, setMovieInfo] = useState({ ...defaultMovieInfo });
 	const [showWritersModal, setShowWritersModal] = useState(false);
 	const [showCastModal, setShowCastModal] = useState(false);
+	const [selectedPosterForUI, setSelectedPosterForUI] = useState('');
 
 	const { updateNotification } = useNotification();
 
@@ -129,11 +131,21 @@ const MovieForm = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(movieInfo);
+	};
+
+	const updatePosterForUI = (file) => {
+		const url = URL.createObjectURL(file);
+		setSelectedPosterForUI(url);
 	};
 
 	const handleChange = ({ target }) => {
-		const { value, name } = target;
+		const { value, name, files } = target;
+
+		if (name === 'poster') {
+			const poster = files[0];
+			updatePosterForUI(poster);
+			return setMovieInfo({ ...movieInfo, poster });
+		}
 		setMovieInfo({ ...movieInfo, [name]: value });
 	};
 
@@ -184,6 +196,7 @@ const MovieForm = () => {
 		if (!newWriters.length) hideWritersModal();
 		setMovieInfo({ ...movieInfo, writers: newWriters });
 	};
+
 	const handleCastRemove = (profileId) => {
 		const { cast } = movieInfo;
 		const newCast = cast.filter(({ profile }) => profile.id !== profileId);
@@ -273,9 +286,24 @@ const MovieForm = () => {
 						<CastForm onSubmit={updateCast} />
 					</div>
 
+					<input
+						type='date'
+						className={commonInputClasses + ' border-2 rounded p-1 w-auto'}
+						onChange={handleChange}
+						name='releaseDate'
+					/>
+
 					<Submit value='Upload' onClick={handleSubmit} type='button' />
 				</div>
-				<div className='w-[30%] h-5 bg-blue-400'></div>
+
+				<div className='w-[30%]'>
+					<PosterSelector
+						name='poster'
+						onChange={handleChange}
+						selectedPoster={selectedPosterForUI}
+						accept='image/jpg, image/jpeg, image/png'
+					/>
+				</div>
 			</div>
 			<WritersModal
 				visible={showWritersModal}
