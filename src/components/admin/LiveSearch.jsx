@@ -89,13 +89,22 @@ const LiveSearch = ({
 	const handleOnFocus = () => {
 		if (results.length) setDisplaySearch(true);
 	};
-	const handleOnBlur = () => {
+	const closeSearch = () => {
 		setDisplaySearch(false);
 		setFocusedIndex(-1);
 	};
 
+	const handleOnBlur = () => {
+		setTimeout(() => {
+			closeSearch();
+		}, 100);
+	};
+
 	const handleSelection = (selectedItem) => {
-		onSelect(selectedItem);
+		if (selectedItem) {
+			onSelect(selectedItem);
+			closeSearch();
+		}
 	};
 
 	const handleKeyDown = ({ key }) => {
@@ -115,7 +124,7 @@ const LiveSearch = ({
 
 		if (key === 'Enter') return handleSelection(results[focusedIndex]);
 
-		if (key === 'Escape') return setDisplaySearch(false);
+		if (key === 'Escape') return closeSearch();
 
 		setFocusedIndex(nextCount);
 	};

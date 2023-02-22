@@ -12,7 +12,7 @@ const Tag = ({ children, onClick }) => {
 	);
 };
 
-const TagsInput = ({ name, onChange }) => {
+const TagsInput = ({ name, onChange, value }) => {
 	const [tag, setTag] = useState('');
 	const [tags, setTags] = useState([]);
 
@@ -62,8 +62,13 @@ const TagsInput = ({ name, onChange }) => {
 	};
 
 	useEffect(() => {
+		if (value.length) setTags(value);
+	}, [value]);
+
+	useEffect(() => {
 		input.current.scrollIntoView({});
 	}, [tag]);
+
 	return (
 		<div>
 			<div
