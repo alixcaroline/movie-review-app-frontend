@@ -21,6 +21,7 @@ import DirectorSelector from '../DirectorSelector';
 import WritersSelector from '../WritersSelector';
 import ViewAllButton from '../ViewAllButton';
 import LabelWithBadge from './LabelWithBage';
+import { validateMovie } from '../../utils/validator';
 
 const defaultMovieInfo = {
 	title: '',
@@ -37,7 +38,7 @@ const defaultMovieInfo = {
 	status: '',
 };
 
-const MovieForm = () => {
+const MovieForm = ({ onSubmit, busy }) => {
 	const [movieInfo, setMovieInfo] = useState({ ...defaultMovieInfo });
 	const [showWritersModal, setShowWritersModal] = useState(false);
 	const [showCastModal, setShowCastModal] = useState(false);
@@ -48,7 +49,41 @@ const MovieForm = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
-		console.log(movieInfo);
+		const { error } = validateMovie(movieInfo);
+		if (error) return updateNotification('error', error);
+
+		//convert MovieInfo to formData in string format so the backend can process it
+		const { tags, genres, cast, director, poster } = movieInfo;
+
+		const formData = new FormData();
+
+		const finalMovieInfo = {
+			...movieInfo,
+		};
+
+		finalMovieInfo.tags = JSON.stringify(tags);
+
+		finalMovieInfo.genres = JSON.stringify(genres);
+
+		const finalCast = cast.map((c) => {
+			return { actor: c.profile.id, roleAs: c.roleAs, leadActor: c.leadActor };
+		});
+		finalMovieInfo.cast = JSON.stringify(finalCast);
+
+		if (writers.length) {
+			const finalWriters = writers.map((w) => w.id);
+			finalMovieInfo.writers = JSON.stringify(finalWriters);
+		}
+
+		if (director) finalMovieInfo.director = director.id;
+
+		if (poster) finalMovieInfo.poster = poster;
+
+		for (let key in finalMovieInfo) {
+			formData.append(key, finalMovieInfo[key]);
+		}
+
+		onSubmit(formData);
 	};
 
 	const updatePosterForUI = (file) => {
@@ -216,7 +251,12 @@ const MovieForm = () => {
 						name='releaseDate'
 					/>
 
-					<Submit value='Upload' onClick={handleSubmit} type='button' />
+					<Submit
+						value='Upload'
+						onClick={handleSubmit}
+						type='button'
+						busy={busy}
+					/>
 				</div>
 
 				<div className='w-[30%] space-y-5'>
