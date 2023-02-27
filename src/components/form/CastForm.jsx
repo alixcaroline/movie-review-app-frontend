@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNotification } from '../../hooks';
+import { searchActor } from '../../api/actor';
+import { useNotification, useSearch } from '../../hooks';
+import { renderItem } from '../../utils/helper';
 import { commonInputClasses } from '../../utils/theme';
 import LiveSearch from '../admin/LiveSearch';
-import { renderItem, results } from '../admin/MovieForm';
 
 const defaultCastInfo = {
 	profile: {},
@@ -12,8 +13,10 @@ const defaultCastInfo = {
 
 const CastForm = ({ onSubmit }) => {
 	const [castInfo, setCastInfo] = useState({ ...defaultCastInfo });
+	const [profiles, setProfiles] = useState([]);
 
 	const { updateNotification } = useNotification();
+	const { handleSearch, resetSearch } = useSearch();
 
 	const handleOnChange = ({ target }) => {
 		const { checked, name, value } = target;
@@ -36,7 +39,17 @@ const CastForm = ({ onSubmit }) => {
 			return updateNotification('error', 'Actor role is missing');
 
 		onSubmit(castInfo);
-		setCastInfo({ ...defaultCastInfo });
+		setCastInfo({ ...defaultCastInfo, profile: { name: '' } });
+		resetSearch();
+		setProfiles([]);
+	};
+
+	const handleProfileChange = ({ target }) => {
+		const { value } = target;
+		const { profile } = castInfo;
+		profile.name = value;
+		setCastInfo({ ...castInfo, ...profile });
+		handleSearch(searchActor, value, setProfiles);
 	};
 
 	const { profile, roleAs, leadActor } = castInfo;
@@ -54,9 +67,10 @@ const CastForm = ({ onSubmit }) => {
 			<LiveSearch
 				placeholder='Search profile'
 				value={profile.name}
-				results={results}
+				results={profiles}
 				onSelect={handleProfileSelect}
 				renderItem={renderItem}
+				onChange={handleProfileChange}
 			/>
 
 			<span className='dark:text-dark-subtle text-light-subtle font-semibold'>

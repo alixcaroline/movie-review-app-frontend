@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { useNotification } from '../../hooks';
 import { commonInputClasses } from '../../utils/theme';
 import Submit from '../form/Submit';
-import LiveSearch from './LiveSearch';
 import TagsInput from './TagsInput';
 import WritersModal from '../modals/WritersModal';
 import CastForm from '../form/CastForm';
@@ -17,58 +16,11 @@ import {
 	statusOptions,
 	languageOptions,
 } from '../../utils/options';
-
-export const results = [
-	{
-		id: '1',
-		avatar:
-			'https://images.unsplash.com/photo-1643713303351-01f540054fd7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80',
-		name: 'John Doe',
-	},
-	{
-		id: '2',
-		avatar:
-			'https://images.unsplash.com/photo-1643883135036-98ec2d9e50a1?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80',
-		name: 'Chandri Anggara',
-	},
-	{
-		id: '3',
-		avatar:
-			'https://images.unsplash.com/photo-1578342976795-062a1b744f37?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80',
-		name: 'Amin RK',
-	},
-	{
-		id: '4',
-		avatar:
-			'https://images.unsplash.com/photo-1564227901-6b1d20bebe9d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80',
-		name: 'Edward Howell',
-	},
-	{
-		id: '5',
-		avatar:
-			'https://images.unsplash.com/photo-1578342976795-062a1b744f37?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80',
-		name: 'Amin RK',
-	},
-	{
-		id: '6',
-		avatar:
-			'https://images.unsplash.com/photo-1564227901-6b1d20bebe9d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&q=80',
-		name: 'Edward Howell',
-	},
-];
-
-export const renderItem = (result) => {
-	return (
-		<div key={result.id} className='flex space-x-2 rounded overflow-hidden'>
-			<img
-				src={result.avatar}
-				alt={result.name}
-				className='w-16 h-16 object-cover'
-			/>
-			<p className='dark:text-white font-semibold'>{result.name}</p>
-		</div>
-	);
-};
+import Label from '../Label';
+import DirectorSelector from '../DirectorSelector';
+import WritersSelector from '../WritersSelector';
+import ViewAllButton from '../ViewAllButton';
+import LabelWithBadge from './LabelWithBage';
 
 const defaultMovieInfo = {
 	title: '',
@@ -94,49 +46,6 @@ const MovieForm = () => {
 
 	const { updateNotification } = useNotification();
 
-	const Label = ({ children, htmlFor }) => {
-		return (
-			<label
-				htmlFor={htmlFor}
-				className='dark:text-dark-subtle text-light-subtle font-semibold'>
-				{children}
-			</label>
-		);
-	};
-
-	const LabelWithBadge = ({ children, htmlFor, badge }) => {
-		const renderBadge = () => {
-			if (!badge) return null;
-			return (
-				<span className='dark:bg-dark-subtle bg-light-subtle absolute top-0 right-0 w-5 h-5 rounded-full flex justify-center items-center text-white translate-x-5 -translate-y-1 text-xs'>
-					{badge <= 9 ? badge : '9+'}
-				</span>
-			);
-		};
-		return (
-			<div className='relative'>
-				<label
-					htmlFor={htmlFor}
-					className='dark:text-dark-subtle text-light-subtle font-semibold'>
-					{children}
-				</label>
-				{renderBadge()}
-			</div>
-		);
-	};
-
-	const ViewAllButton = ({ children, onClick, visible }) => {
-		if (!visible) return null;
-		return (
-			<button
-				type='button'
-				className='dark:text-white text-primary hover:underline transition'
-				onClick={onClick}>
-				{children}
-			</button>
-		);
-	};
-
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		console.log(movieInfo);
@@ -155,6 +64,7 @@ const MovieForm = () => {
 			updatePosterForUI(poster);
 			return setMovieInfo({ ...movieInfo, poster });
 		}
+
 		setMovieInfo({ ...movieInfo, [name]: value });
 	};
 
@@ -165,6 +75,7 @@ const MovieForm = () => {
 	const updateDirector = (profile) => {
 		setMovieInfo({ ...movieInfo, director: profile });
 	};
+
 	const updateCast = (castInfo) => {
 		const { cast } = movieInfo;
 		setMovieInfo({ ...movieInfo, cast: [...cast, castInfo] });
@@ -270,18 +181,7 @@ const MovieForm = () => {
 
 					<TagsInput name='tags' onChange={updateTags} value={tags} />
 
-					<div>
-						<Label htmlFor='director'>Director</Label>
-						<LiveSearch
-							name='director'
-							value={director.name}
-							placeholder='Search profile'
-							results={results}
-							renderItem={renderItem}
-							onSelect={updateDirector}
-							onChange={(e) => console.log(e)}
-						/>
-					</div>
+					<DirectorSelector onSelect={updateDirector} />
 
 					<div>
 						<div className='flex justify-between'>
@@ -294,15 +194,7 @@ const MovieForm = () => {
 								View all
 							</ViewAllButton>
 						</div>
-						<LiveSearch
-							name='writers'
-							value={writers.map((writer) => writer.name)}
-							placeholder='Search profile'
-							results={results}
-							renderItem={renderItem}
-							onSelect={updateWriters}
-							onChange={(e) => console.log(e)}
-						/>
+						<WritersSelector onSelect={updateWriters} />
 					</div>
 
 					<div>
