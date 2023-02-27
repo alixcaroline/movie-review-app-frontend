@@ -329,6 +329,7 @@ const MovieForm = () => {
 
 				<div className='w-[30%] space-y-5'>
 					<PosterSelector
+						label='Select Poster'
 						name='poster'
 						onChange={handleChange}
 						selectedPoster={selectedPosterForUI}
