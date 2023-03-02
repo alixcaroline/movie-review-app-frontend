@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ImSpinner3 } from 'react-icons/im';
 import { useNotification } from '../../hooks';
 import { commonInputClasses } from '../../utils/theme';
@@ -17,7 +17,7 @@ const genderOptions = [
 	{ title: 'Female', value: 'female' },
 	{ title: 'Other', value: 'other' },
 ];
-const ActorForm = ({ title, btnTitle, onSubmit, busy }) => {
+const ActorForm = ({ title, btnTitle, onSubmit, busy, initialState }) => {
 	const [actorInfo, setActorInfo] = useState({ ...defaultActorInfo });
 	const [selectedAvatarForUI, setSelectedAvatarForUI] = useState('');
 	const { updateNotification } = useNotification();
@@ -60,6 +60,13 @@ const ActorForm = ({ title, btnTitle, onSubmit, busy }) => {
 
 		onSubmit(formData);
 	};
+
+	useEffect(() => {
+		if (initialState) {
+			setActorInfo({ ...initialState, avatar: null });
+			setSelectedAvatarForUI(initialState.avatar);
+		}
+	}, [initialState]);
 
 	const { name, about, gender } = actorInfo;
 	return (
