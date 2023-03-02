@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-
+import React, { useEffect, useState } from 'react';
+import { useNotification } from '../../hooks/index';
 import { BsTrash, BsPencilSquare } from 'react-icons/bs';
+import { getActors } from '../../api/actor';
+import PrevAndNextBtn from '../PrevAndNextBtn';
 
 const Options = ({ visible, onDeleteClick, onEditClick }) => {
 	if (!visible) return null;
@@ -24,6 +26,7 @@ const Options = ({ visible, onDeleteClick, onEditClick }) => {
 
 const ActorProfile = ({ profile }) => {
 	const [showOptions, setShowOptions] = useState(false);
+	const acceptedNameLength = 15;
 	const { avatar, name, about = '' } = profile;
 
 	const handleOnMouseEnter = () => {
@@ -32,6 +35,11 @@ const ActorProfile = ({ profile }) => {
 
 	const handleOnMouseLeave = () => {
 		setShowOptions(false);
+	};
+
+	const getName = (name) => {
+		if (name.length <= acceptedNameLength) return name;
+		return name.substring(0, acceptedNameLength) + '...';
 	};
 
 	if (!profile) return null;
@@ -48,9 +56,9 @@ const ActorProfile = ({ profile }) => {
 				/>
 				<div className='px-2'>
 					<h1 className='text-lg text-primary dark:text-white font-semibold'>
-						{name}
+						{getName(name)}
 					</h1>
-					<p className='text-primary dark:text-white'>
+					<p className='text-primary dark:text-white opacity-75'>
 						{about.substring(0, 50)}
 					</p>
 				</div>
@@ -60,40 +68,56 @@ const ActorProfile = ({ profile }) => {
 	);
 };
 
+let currentPageNo = 0;
+let limit = 1;
+
 const Actors = () => {
+	const [actors, setActors] = useState([]);
+	const [reachedToEnd, setReachedToEnd] = useState(false);
+
+	const { updateNotification } = useNotification();
+
+	const fetchActors = async (pageNo) => {
+		const { profiles, error } = await getActors(pageNo, limit);
+		if (error) return updateNotification('error', error);
+
+		if (!profiles.length) {
+			currentPageNo = pageNo - 1;
+			return setReachedToEnd(true);
+		}
+
+		setActors([...profiles]);
+	};
+
+	const handleOnNextClick = () => {
+		if (reachedToEnd) return;
+		currentPageNo += 1;
+		fetchActors(currentPageNo);
+	};
+
+	const handleOnPrevClick = () => {
+		if (currentPageNo <= 0) return;
+		if (reachedToEnd) setReachedToEnd(false);
+
+		currentPageNo -= 1;
+		fetchActors(currentPageNo);
+	};
+
+	useEffect(() => {
+		fetchActors(currentPageNo);
+	}, []);
+
 	return (
-		<div className='grid grid-cols-4 gap-3 my-5'>
-			<ActorProfile
-				profile={{
-					avatar:
-						'https://images.unsplash.com/photo-1594647210801-5124307f3d51?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8auto=format&fit=crop&w=1064&q=80',
-					name: 'Jane Doe',
-					about: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. ',
-				}}
-			/>
-			<ActorProfile
-				profile={{
-					avatar:
-						'https://images.unsplash.com/photo-1594647210801-5124307f3d51?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8auto=format&fit=crop&w=1064&q=80',
-					name: 'Jane Doe',
-					about: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. ',
-				}}
-			/>
-			<ActorProfile
-				profile={{
-					avatar:
-						'https://images.unsplash.com/photo-1594647210801-5124307f3d51?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8auto=format&fit=crop&w=1064&q=80',
-					name: 'Jane Doe',
-					about: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. ',
-				}}
-			/>
-			<ActorProfile
-				profile={{
-					avatar:
-						'https://images.unsplash.com/photo-1594647210801-5124307f3d51?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8auto=format&fit=crop&w=1064&q=80',
-					name: 'Jane Doe',
-					about: 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. ',
-				}}
+		<div className='p-5'>
+			<div className='grid grid-cols-4 gap-5'>
+				{actors.map((actor) => (
+					<ActorProfile profile={actor} key={actor.id} />
+				))}
+			</div>
+			<PrevAndNextBtn
+				className='mt-5'
+				onPrevClick={handleOnPrevClick}
+				onNextClick={handleOnNextClick}
 			/>
 		</div>
 	);
