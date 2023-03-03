@@ -1,6 +1,6 @@
 import { BsTrash, BsPencilSquare, BsBoxArrowUpRight } from 'react-icons/bs';
 
-const MovieListItem = ({ movie, OnDeleteClick, OnEditClick, OnOpenClick }) => {
+const MovieListItem = ({ movie, onDeleteClick, onEditClick, onOpenClick }) => {
 	const { poster, title, genres = [], status } = movie;
 	return (
 		<table className='w-full border-b '>
@@ -32,13 +32,13 @@ const MovieListItem = ({ movie, OnDeleteClick, OnEditClick, OnOpenClick }) => {
 					</td>
 					<td>
 						<div className='flex items-center space-x-3 text-primary dark:text-white text-lg'>
-							<button onClick={OnDeleteClick} type='button'>
+							<button onClick={onDeleteClick} type='button'>
 								<BsTrash />
 							</button>
-							<button onClick={OnEditClick} type='button'>
+							<button onClick={onEditClick} type='button'>
 								<BsPencilSquare />
 							</button>
-							<button onClick={OnOpenClick} type='button'>
+							<button onClick={onOpenClick} type='button'>
 								<BsBoxArrowUpRight />
 							</button>
 						</div>

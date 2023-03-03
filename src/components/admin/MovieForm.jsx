@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useNotification } from '../../hooks';
 import { commonInputClasses } from '../../utils/theme';
@@ -38,7 +38,7 @@ const defaultMovieInfo = {
 	status: '',
 };
 
-const MovieForm = ({ onSubmit, busy }) => {
+const MovieForm = ({ onSubmit, busy, initialState, btnTitle }) => {
 	const [movieInfo, setMovieInfo] = useState({ ...defaultMovieInfo });
 	const [showWritersModal, setShowWritersModal] = useState(false);
 	const [showCastModal, setShowCastModal] = useState(false);
@@ -83,7 +83,7 @@ const MovieForm = ({ onSubmit, busy }) => {
 			formData.append(key, finalMovieInfo[key]);
 		}
 
-		onSubmit(formData);
+		return onSubmit(formData);
 	};
 
 	const updatePosterForUI = (file) => {
@@ -170,6 +170,17 @@ const MovieForm = ({ onSubmit, busy }) => {
 		setMovieInfo({ ...movieInfo, genres });
 	};
 
+	useEffect(() => {
+		if (initialState) {
+			setMovieInfo({
+				...initialState,
+				releaseDate: initialState.releaseDate.split('T')[0],
+				poster: null,
+			});
+			setSelectedPosterForUI(initialState.poster);
+		}
+	}, [initialState]);
+
 	const {
 		title,
 		storyLine,
@@ -181,6 +192,7 @@ const MovieForm = ({ onSubmit, busy }) => {
 		type,
 		language,
 		status,
+		releaseDate,
 	} = movieInfo;
 
 	return (
@@ -249,10 +261,11 @@ const MovieForm = ({ onSubmit, busy }) => {
 						className={commonInputClasses + ' border-2 rounded p-1 w-auto'}
 						onChange={handleChange}
 						name='releaseDate'
+						value={releaseDate}
 					/>
 
 					<Submit
-						value='Upload'
+						value={btnTitle}
 						onClick={handleSubmit}
 						type='button'
 						busy={busy}
