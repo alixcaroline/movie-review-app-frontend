@@ -100,3 +100,18 @@ export const deleteMovie = async (id) => {
 		return catchError(error);
 	}
 };
+
+export const searchMoviesForAdmin = async (title) => {
+	const token = getToken();
+
+	try {
+		const { data } = await client(`/movie/search?title=${title}`, {
+			headers: {
+				authorization: 'Bearer ' + token,
+			},
+		});
+		return data;
+	} catch (error) {
+		return catchError(error);
+	}
+};
