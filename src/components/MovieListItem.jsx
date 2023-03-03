@@ -1,6 +1,71 @@
+import { useState } from 'react';
 import { BsTrash, BsPencilSquare, BsBoxArrowUpRight } from 'react-icons/bs';
+import { deleteMovie } from '../api/movie';
+import { useNotification } from '../hooks';
+import ConfirmModal from './modals/ConfirmModal';
+import UpdateMovie from './modals/UpdateMovie';
 
-const MovieListItem = ({ movie, onDeleteClick, onEditClick, onOpenClick }) => {
+const MovieListItem = ({ movie, afterDelete, afterUpdate }) => {
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [showUpdateModal, setShowUpdateModal] = useState(false);
+	const [selectedMovieId, setSelectedMovieId] = useState(null);
+	const [busy, setBusy] = useState(false);
+
+	const { updateNotification } = useNotification();
+
+	const displayConfirmModal = () => setShowConfirmModal(true);
+
+	const hideConfirmModal = () => setShowConfirmModal(false);
+
+	const handleOnDeleteConfirm = async () => {
+		setBusy(true);
+		const { error, message } = await deleteMovie(movie.id);
+		setBusy(false);
+		if (error) return updateNotification('error', error);
+
+		hideConfirmModal();
+		updateNotification('success', message);
+		afterDelete(movie);
+	};
+
+	const handleOnEditClick = () => {
+		setSelectedMovieId(movie.id);
+		setShowUpdateModal(true);
+	};
+
+	const handleOnUpdate = (movie) => {
+		afterUpdate(movie);
+		setShowUpdateModal(false);
+		setSelectedMovieId(null);
+	};
+
+	return (
+		<>
+			<MovieCard
+				movie={movie}
+				onDeleteClick={displayConfirmModal}
+				onEditClick={handleOnEditClick}
+			/>
+			<div className='p-0'>
+				<ConfirmModal
+					visible={showConfirmModal}
+					onCancel={hideConfirmModal}
+					onConfirm={handleOnDeleteConfirm}
+					title='Are you sure?'
+					subtitle='This action will remove this movie permanently'
+					busy={busy}
+				/>
+				<UpdateMovie
+					visible={showUpdateModal}
+					onSuccess={handleOnUpdate}
+					movieId={selectedMovieId}
+				/>
+			</div>
+		</>
+	);
+};
+
+const MovieCard = ({ movie, onDeleteClick, onEditClick, onOpenClick }) => {
 	const { poster, title, genres = [], status } = movie;
 	return (
 		<table className='w-full border-b '>
