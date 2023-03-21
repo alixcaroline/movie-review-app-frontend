@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import Dashboard from '../components/admin/Dashboard';
 import Movies from '../components/admin/Movies';
 import Actors from '../components/admin/Actors';
-import NotFound from '../components/user/NotFound';
+import NotFound from '../components/NotFound';
 import Navbar from '../components/admin/Navbar';
 import Header from '../components/admin/Header';
 import MovieUpload from '../components/admin/MovieUpload';

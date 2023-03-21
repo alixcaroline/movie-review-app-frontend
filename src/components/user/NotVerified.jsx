@@ -1,7 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks';
-import Container from '../Container';
 
 const NotVerified = () => {
 	const { authInfo } = useAuth();
@@ -15,7 +14,7 @@ const NotVerified = () => {
 	};
 
 	return (
-		<Container>
+		<div>
 			{isLoggedIn && !isVerified ? (
 				<p className='text-lg text-center bg-blue-50 p-2'>
 					It looks like you haven't verified your account
@@ -26,7 +25,7 @@ const NotVerified = () => {
 					</button>
 				</p>
 			) : null}
-		</Container>
+		</div>
 	);
 };
 
