@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getSingleMovie } from '../../api/movie';
 import { useAuth, useNotification } from '../../hooks';
+import { convertReviewCount } from '../../utils/helper';
 import Container from '../Container';
 import CustomBtnLink from '../CustomBtnLink';
 import AddRatingModal from '../modals/AddRatingModal';
@@ -38,12 +39,6 @@ const CastProfile = ({ profile, roleAs, handleProfileClick }) => {
 			<p className='text-light-subtle dark:text-dark-subtle'>{roleAs}</p>
 		</div>
 	);
-};
-
-const convertReviewCount = (count = 0) => {
-	if (count <= 999) return count;
-
-	return parseFloat(count / 1000).toFixed(2) + 'k';
 };
 
 const convertDate = (date = '') => {
