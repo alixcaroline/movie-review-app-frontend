@@ -1,13 +1,20 @@
 import React from 'react';
 import { BsFillSunFill } from 'react-icons/bs';
 import Container from '../Container';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth, useTheme } from '../../hooks';
+import AppSearchForm from '../form/AppSearchForm';
 
 const Navbar = () => {
 	const { toggleTheme } = useTheme();
 	const { authInfo, handleLogout } = useAuth();
 	const { isLoggedIn } = authInfo;
+
+	const navigate = useNavigate();
+
+	const handleSearchSubmit = (query) => {
+		navigate(`/movie/search?title=${query}`);
+	};
 	return (
 		<div className='bg-secondary shadow-sm shadow-gray-500'>
 			<Container className='p-2'>
@@ -16,22 +23,22 @@ const Navbar = () => {
 						<img
 							src='./logo.png'
 							alt='movie review app logo'
-							className='h-10'
+							className='sm:h-10 h-8'
 						/>
 					</Link>
-					<ul className='flex items-center space-x-4'>
+					<ul className='flex items-center sm:space-x-4 space-x-2'>
 						<li>
 							<button
 								onClick={toggleTheme}
-								className='dark:bg-white bg-dark-subtle p-1 rounded'>
-								<BsFillSunFill className='text-secondary size={24}' />
+								className='dark:bg-white bg-dark-subtle p-1 rounded sm:text-2xl text-lg'>
+								<BsFillSunFill className='text-secondary' />
 							</button>
 						</li>
 						<li>
-							<input
-								type='text'
-								className='border-2 border-dark-subtle p-1 rounded bg-transparent text-xl outline-none focus:border-white transition text-white'
-								placeholder='search...'
+							<AppSearchForm
+								placeholder='Search'
+								inputClassName='border-dark-subtle text-white focus:border-white sm:w-auto w-40 sm:text-lg'
+								onSubmit={handleSearchSubmit}
 							/>
 						</li>
 

@@ -43,6 +43,8 @@ const Slide = forwardRef((props, ref) => {
 
 let count = 0;
 let intervalId;
+let newTime = 0;
+let lastTime = 0;
 
 const HeroSlideShow = () => {
 	const [currentSlide, setCurrentSlide] = useState({});
@@ -64,7 +66,12 @@ const HeroSlideShow = () => {
 	};
 
 	const startSlideShow = () => {
-		intervalId = setInterval(handleOnNextClick, 3500);
+		intervalId = setInterval(() => {
+			newTime = Date.now();
+			const delta = newTime - lastTime;
+			if (delta < 4000) return clearInterval(intervalId);
+			handleOnNextClick();
+		}, 3500);
 	};
 
 	const pauseSlideShow = () => {
@@ -89,6 +96,7 @@ const HeroSlideShow = () => {
 
 	//0,1,2,3,4
 	const handleOnNextClick = () => {
+		lastTime = Date.now();
 		pauseSlideShow();
 		setClonedSlide(slides[count]);
 		count = (count + 1) % slides.length;
@@ -154,7 +162,7 @@ const HeroSlideShow = () => {
 	return (
 		<div className='w-full flex'>
 			{/* Slide show section */}
-			<div className='w-4/5 aspect-video relative overflow-hidden'>
+			<div className='md:w-4/5 w-full aspect-video relative overflow-hidden'>
 				{/* current slide */}
 				<Slide
 					ref={slideRef}
@@ -180,7 +188,7 @@ const HeroSlideShow = () => {
 			</div>
 
 			{/* Up Next Section */}
-			<div className='w-1/5 space-y-3 px-3'>
+			<div className='w-1/5 md:block hidden space-y-3 px-3'>
 				<h1 className='font-semibold text-2xl text-primary dark:text-white'>
 					Up Next
 				</h1>

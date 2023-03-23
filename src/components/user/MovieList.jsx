@@ -16,13 +16,15 @@ const ListItem = ({ movie }) => {
 			<img
 				src={getPoster(responsivePosters) || poster}
 				alt={title}
-				className='aspect-video object-cover'
+				className='aspect-video object-cover w-full'
 			/>
-			<h1
-				title={title}
-				className='text-lg dark:text-white text-secondary font-semibold'>
-				{trimTitle(title)}
-			</h1>
+			{title ? (
+				<h1
+					title={title}
+					className='text-lg dark:text-white text-secondary font-semibold'>
+					{trimTitle(title)}
+				</h1>
+			) : null}
 			<RatingStar rating={reviews.ratingAvg} />
 		</Link>
 	);
