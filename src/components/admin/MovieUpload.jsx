@@ -15,10 +15,10 @@ const TrailerSelector = ({ visible, handleChange, onTypeError }) => {
 				handleChange={handleChange}
 				types={['mp4', 'avi']}
 				onTypeError={onTypeError}>
-				<div className='w-48 h-48 border border-dashed dark:border-dark-subtle border-light-subtle flex flex-col rounded-full items-center justify-center text-light-subtle dark:text-dark-subtle cursor-pointer'>
+				<label className='w-48 h-48 border border-dashed dark:border-dark-subtle border-light-subtle flex flex-col rounded-full items-center justify-center text-light-subtle dark:text-dark-subtle cursor-pointer'>
 					<AiOutlineCloudUpload size={80} />
 					<p>Drop your files here!</p>
-				</div>
+				</label>
 			</FileUploader>
 		</div>
 	);
@@ -48,6 +48,13 @@ const MovieUpload = ({ visible, onClose }) => {
 	const [uploadProgress, setUploadProgress] = useState(0);
 	const [videoInfo, setVideoInfo] = useState({});
 	const { updateNotification } = useNotification();
+
+	const resetState = () => {
+		setVideoUploaded(false);
+		setVideoSelected(false);
+		setUploadProgress(0);
+		setVideoInfo({});
+	};
 
 	const handleUploadTrailer = async (data) => {
 		const { error, url, public_id } = await uploadTrailer(
@@ -86,8 +93,11 @@ const MovieUpload = ({ visible, onClose }) => {
 
 		setBusy(true);
 		data.append('trailer', JSON.stringify(videoInfo));
-		const res = await uploadMovie(data);
+		const { error, movie } = await uploadMovie(data);
 		setBusy(false);
+		if (error) return updateNotification('error', error);
+		updateNotification('success', 'Movie created successfully!');
+		resetState();
 		onClose();
 	};
 

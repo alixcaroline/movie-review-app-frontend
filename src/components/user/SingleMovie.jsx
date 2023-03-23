@@ -3,11 +3,44 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { getSingleMovie } from '../../api/movie';
 import { useAuth, useNotification } from '../../hooks';
 import Container from '../Container';
+import CustomBtnLink from '../CustomBtnLink';
+import AddRatingModal from '../modals/AddRatingModal';
+import ProfileModal from '../modals/ProfileModal';
 import RatingStar from '../RatingStar';
 import RelatedMovies from './RelatedMovies';
 
-const convertReviewCount = (count) => {
-	if (!count) return 0;
+const ListWithLabel = ({ label, children }) => {
+	return (
+		<div className='flex space-x-2'>
+			<p className='text-light-subtle dark:text-dark-subtle font-semibold'>
+				{label}
+			</p>
+			{children}
+		</div>
+	);
+};
+
+const CastProfile = ({ profile, roleAs, handleProfileClick }) => {
+	const { name, avatar } = profile;
+	return (
+		<div className='flex flex-col items-center text-center basis-28 mb-4'>
+			<img
+				className='w-24 h-24 aspect-square object-cover rounded-full'
+				src={avatar}
+				alt={name}
+			/>
+
+			<CustomBtnLink label={name} onClick={() => handleProfileClick(profile)} />
+
+			<span className=' text-sm text-light-subtle dark:text-dark-subtle'>
+				as
+			</span>
+			<p className='text-light-subtle dark:text-dark-subtle'>{roleAs}</p>
+		</div>
+	);
+};
+
+const convertReviewCount = (count = 0) => {
 	if (count <= 999) return count;
 
 	return parseFloat(count / 1000).toFixed(2) + 'k';
@@ -20,11 +53,15 @@ const convertDate = (date = '') => {
 const SingleMovie = () => {
 	const [ready, setReady] = useState(false);
 	const [movie, setMovie] = useState({});
+	const [showRatingModal, setShowRatingModal] = useState(false);
+	const [showProfileModal, setShowProfileModal] = useState(false);
+	const [selectedProfile, setSelectedProfile] = useState({});
 
 	const { movieId } = useParams();
 
 	const { updateNotification } = useNotification();
-	const { isLoggedIn } = useAuth();
+	const { authInfo } = useAuth();
+	const { isLoggedIn } = authInfo;
 	const navigate = useNavigate();
 
 	const fetchMovie = async () => {
@@ -37,6 +74,24 @@ const SingleMovie = () => {
 
 	const handleOnRateMovie = () => {
 		if (!isLoggedIn) return navigate('/auth/signin');
+		setShowRatingModal(true);
+	};
+
+	const hideRatingModal = () => {
+		setShowRatingModal(false);
+	};
+
+	const handleOnRatingSuccess = (reviews) => {
+		setMovie({ ...movie, reviews: { ...reviews } });
+	};
+
+	const handleProfileClick = (profile) => {
+		setSelectedProfile(profile);
+		setShowProfileModal(true);
+	};
+
+	const hideProfileModal = () => {
+		setShowProfileModal(false);
 	};
 
 	useEffect(() => {
@@ -69,141 +124,89 @@ const SingleMovie = () => {
 
 	return (
 		<div className=' bg-white dark:bg-primary min-h-screen pb-10'>
-			<Container>
+			<Container className='xl:px-0 px-2'>
 				<video poster={poster} controls src={trailer}></video>
 				<div className='flex justify-between'>
-					<h1 className='text-4xl text-highlight dark:text-highlight-dark font-semibold py-3'>
+					<h1 className='xl:text-4xl lg:text-3xl text-2xl text-highlight dark:text-highlight-dark font-semibold py-3'>
 						{title}
 					</h1>
 					<div className='flex flex-col items-end'>
 						<RatingStar rating={reviews.ratingAvg} />
-						<Link
-							className='text-highlight dark:text-highlight-dark hover:underline'
-							to={'/movie/reviews/' + movieId}>
-							{convertReviewCount(reviews.reviewCount)} Reviews
-						</Link>
+						<CustomBtnLink
+							onClick={() => navigate('/movie/reviews/' + movieId)}
+							label={convertReviewCount(reviews.reviewCount) + ' Reviews'}
+						/>
 
-						<button
+						<CustomBtnLink
 							onClick={handleOnRateMovie}
-							type='button'
-							className='text-highlight dark:text-highlight-dark hover:underline'>
-							Rate the movie
-						</button>
+							label='Rate this movie'
+						/>
 					</div>
 				</div>
 				<div className='space-y-3'>
 					<p className='text-light-subtle dark:text-dark-subtle'>{storyLine}</p>
 
-					<div className='flex space-x-2'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold'>
-							Director:
-						</p>
-						<p className='text-highlight dark:text-highlight-dark hover:underline cursor-pointer'>
-							{director.name}
-						</p>
-					</div>
+					<ListWithLabel label='Director:'>
+						<CustomBtnLink
+							label={director.name}
+							onClick={() => handleProfileClick(director)}
+						/>
+					</ListWithLabel>
 
-					<div className='flex'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold mr-2'>
-							Writers:
-						</p>
-						<div className='flex space-x-2'>
-							{writers.map((w) => (
-								<p
-									key={w.id}
-									className='text-highlight dark:text-highlight-dark hover:underline cursor-pointer'>
-									{w.name}
-								</p>
-							))}
-						</div>
-					</div>
+					<ListWithLabel label='Writers:'>
+						{writers.map((w) => (
+							<CustomBtnLink
+								key={w.id}
+								label={w.name}
+								onClick={() => handleProfileClick(w)}
+							/>
+						))}
+					</ListWithLabel>
 
-					<div className='flex'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold mr-2'>
-							Cast:
-						</p>
-						<div className='space-x-2'>
-							{cast.map((c) => {
-								return c.leadActor ? (
-									<p
-										key={c.profile.id}
-										className='text-highlight dark:text-highlight-dark hover:underline cursor-pointer'>
-										{c.profile.name}
-									</p>
-								) : null;
-							})}
-						</div>
-					</div>
+					<ListWithLabel label='Cast:'>
+						{cast.map(({ id, profile, leadActor }) => {
+							return leadActor ? (
+								<CustomBtnLink
+									label={profile.name}
+									key={id}
+									onClick={() => handleProfileClick(profile)}
+								/>
+							) : null;
+						})}
+					</ListWithLabel>
 
-					<div className='flex space-x-2'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold'>
-							Language:
-						</p>
-						<p className='text-highlight dark:text-highlight-dark'>
-							{language}
-						</p>
-					</div>
+					<ListWithLabel label='Language:'>
+						<CustomBtnLink label={language} clickable={false} />
+					</ListWithLabel>
 
-					<div className='flex space-x-2'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold'>
-							Release date:
-						</p>
-						<p className='text-highlight dark:text-highlight-dark'>
-							{convertDate(releaseDate)}
-						</p>
-					</div>
+					<ListWithLabel label='Release date:'>
+						<CustomBtnLink label={convertDate(releaseDate)} clickable={false} />
+					</ListWithLabel>
 
-					<div className='flex'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold mr-2'>
-							Genres:
-						</p>
-						<div className=' flex space-x-2'>
-							{genres.map((g) => {
-								return (
-									<p
-										key={g}
-										className='text-highlight dark:text-highlight-dark '>
-										{g}
-									</p>
-								);
-							})}
-						</div>
-					</div>
+					<ListWithLabel label='Genres:'>
+						{genres.map((g) => {
+							return <CustomBtnLink key={g} label={g} />;
+						})}
+					</ListWithLabel>
 
-					<div className='flex space-x-2'>
-						<p className='text-light-subtle dark:text-dark-subtle font-semibold'>
-							Type:
-						</p>
-						<p className='text-highlight dark:text-highlight-dark'>{type}</p>
-					</div>
+					<ListWithLabel label='Type:'>
+						<CustomBtnLink label={type} />
+					</ListWithLabel>
 				</div>
 
 				<div className='mt-5'>
 					<h1 className='text-2xl mb-2 text-highlight dark:text-highlight-dark'>
 						Cast:
 					</h1>
-					<div className='grid grid-cols-10 '>
+					<div className='flex flex-wrap space-x-4'>
 						{cast.map((c) => {
 							return (
-								<div
+								<CastProfile
 									key={c.profile.id}
-									className='flex flex-col justify-center'>
-									<img
-										className='w-24 h-24 aspect-square object-cover rounded-full'
-										src={c.profile.avatar}
-										alt={c.profile.name}
-									/>
-
-									<p className='text-highlight dark:text-highlight-dark hover:underline cursor-pointer'>
-										{c.profile.name}
-									</p>
-									<span className=' text-sm text-light-subtle dark:text-dark-subtle'>
-										as
-									</span>
-									<p className='text-light-subtle dark:text-dark-subtle'>
-										{c.roleAs}
-									</p>
-								</div>
+									profile={c.profile}
+									roleAs={c.roleAs}
+									handleProfileClick={handleProfileClick}
+								/>
 							);
 						})}
 					</div>
@@ -212,6 +215,16 @@ const SingleMovie = () => {
 					<RelatedMovies movieId={movieId} />
 				</div>
 			</Container>
+			<ProfileModal
+				visible={showProfileModal}
+				onClose={hideProfileModal}
+				profileId={selectedProfile.id}
+			/>
+			<AddRatingModal
+				visible={showRatingModal}
+				onClose={hideRatingModal}
+				onSuccess={handleOnRatingSuccess}
+			/>
 		</div>
 	);
 };

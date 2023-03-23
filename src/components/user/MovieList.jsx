@@ -1,8 +1,8 @@
 import React from 'react';
-import { AiFillStar } from 'react-icons/ai';
 import { Link } from 'react-router-dom';
 import GridContainer from '../GridContainer';
 import RatingStar from '../RatingStar';
+import { getPoster } from '../../utils/helper';
 
 const trimTitle = (text = '') => {
 	if (text.length <= 20) return text;
@@ -10,10 +10,14 @@ const trimTitle = (text = '') => {
 };
 
 const ListItem = ({ movie }) => {
-	const { title, poster, reviews, id } = movie;
+	const { title, poster, responsivePosters, reviews, id } = movie;
 	return (
 		<Link to={'/movie/' + id}>
-			<img src={poster} alt={title} className='aspect-video object-cover' />
+			<img
+				src={getPoster(responsivePosters) || poster}
+				alt={title}
+				className='aspect-video object-cover'
+			/>
 			<h1
 				title={title}
 				className='text-lg dark:text-white text-secondary font-semibold'>

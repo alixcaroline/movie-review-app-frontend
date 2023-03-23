@@ -1,5 +1,5 @@
 export const isValidEmail = (email) => {
-	const isValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+	const isValid = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 	return isValid.test(email);
 };
@@ -23,4 +23,13 @@ export const renderItem = (result) => {
 			<p className='dark:text-white font-semibold'>{result.name}</p>
 		</div>
 	);
+};
+
+export const getPoster = (posters = []) => {
+	const { length } = posters;
+	if (!length) return null;
+	//if poster has more than 2 items select 2nd one
+	if (length > 2) return posters[1];
+	// else select first one
+	return posters[0];
 };
